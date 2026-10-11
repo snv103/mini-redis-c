@@ -28,7 +28,15 @@ int main() {
         exit(1);
     }
     printf("the server is listening to port 1234\n");
-    sleep(60);
+    struct sockaddr_in client = {0};
+    socklen_t client_len = sizeof(client);
+    int ac = accept(fd, (struct sockaddr *)&client, &client_len); 
+     if(ac < 0) {
+        perror("accept");
+        exit(1);
+    }
+    printf("got a client\n");
     close(fd);
+    close(ac);
     return 0;
 }
