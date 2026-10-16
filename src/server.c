@@ -44,6 +44,11 @@ int main() {
     }
     buf[byte_count] = '\0';
     printf("client says %s\n", buf);
+    ssize_t count_byte = write(ac, buf, byte_count);
+    if(count_byte <  0) {
+        perror("write");
+        exit(1);
+    }
     close(fd);
     close(ac);
     return 0;
