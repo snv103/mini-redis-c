@@ -28,34 +28,36 @@ int main() {
         exit(1);
     }
     printf("the server is listening to port 1234\n");
-    struct sockaddr_in client = {0};
-    socklen_t client_len = sizeof(client);
-    int ac = accept(fd, (struct sockaddr *)&client, &client_len); 
-     if(ac < 0) {
-        perror("accept");
-        exit(1);
-    }
-    printf("got a client\n");
-    char buf[1024];
     while(1) {
-        ssize_t byte_count = read(ac, buf, sizeof(buf) - 1);
-        if(byte_count < 0) {
-            perror("read");
-            break;
+        struct sockaddr_in client = {0};
+        socklen_t client_len = sizeof(client);
+        int ac = accept(fd, (struct sockaddr *)&client, &client_len); 
+        if(ac < 0) {
+            perror("accept");
+            continue;
         }
-        else if(byte_count == 0) {
-            printf("client disconnected\n");
-            break;
+        printf("got a client\n");
+        char buf[1024];
+        while(1) {
+            ssize_t byte_count = read(ac, buf, sizeof(buf) - 1);
+            if(byte_count < 0) {
+                perror("read");
+                break;
+            }
+            else if(byte_count == 0) {
+                printf("client disconnected\n");
+                break;
+            }
+            ssize_t count_byte = write(ac, buf, byte_count);
+            buf[byte_count] = '\0';
+            printf("client says %s\n", buf);
+            if(count_byte < 0) {
+                perror("write");
+                break;
+            }
         }
-        ssize_t count_byte = write(ac, buf, byte_count);
-        buf[byte_count] = '\0';
-        printf("client says %s\n", buf);
-        if(count_byte < 0) {
-            perror("write");
-            exit(1);
-        }
+        close(ac);
     }
     close(fd);
-    close(ac);
     return 0;
 }
