@@ -37,17 +37,23 @@ int main() {
     }
     printf("got a client\n");
     char buf[1024];
-    ssize_t byte_count = read(ac, buf, sizeof(buf) - 1);
-    if(byte_count < 0) {
-        perror("read");
-        exit(1);
-    }
-    buf[byte_count] = '\0';
-    printf("client says %s\n", buf);
-    ssize_t count_byte = write(ac, buf, byte_count);
-    if(count_byte <  0) {
-        perror("write");
-        exit(1);
+    while(1) {
+        ssize_t byte_count = read(ac, buf, sizeof(buf) - 1);
+        if(byte_count < 0) {
+            perror("read");
+            break;
+        }
+        else if(byte_count == 0) {
+            printf("client disconnected\n");
+            break;
+        }
+        ssize_t count_byte = write(ac, buf, byte_count);
+        buf[byte_count] = '\0';
+        printf("client says %s\n", buf);
+        if(count_byte < 0) {
+            perror("write");
+            exit(1);
+        }
     }
     close(fd);
     close(ac);
