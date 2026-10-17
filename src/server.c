@@ -3,6 +3,35 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <errno.h>
+
+ssize_t read_full(int fd, void *buf, size_t count) {
+    size_t bytes_read = 0;
+    while(bytes_read < count) {
+        ssize_t res = read(fd, (char *)buf + bytes_read, count - bytes_read);
+        if(res < 0) {
+            if(errno == EINTR) continue;
+            return -1;
+        }
+        else if(res == 0) break;
+        bytes_read += res;
+    }
+    return bytes_read;
+} // read_full
+
+ssize_t write_all(int fd, void *buf, size_t count) {
+    size_t bytes_written = 0;
+    while(bytes_written < count) {
+        ssize_t res = write(fd, (char *)buf + bytes_written, count - bytes_written);
+        if(res < 0) {
+            if(errno == EINTR) continue;
+            return -1;
+        }
+        else if(res == 0) break;
+        bytes_written += res;
+    }
+    return bytes_written;
+} // write_all
 
 int main() {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
