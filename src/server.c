@@ -17,7 +17,7 @@ ssize_t read_full(int fd, void *buf, size_t count) {
         bytes_read += res;
     }
     return bytes_read;
-} // read_full
+}
 
 ssize_t write_all(int fd, void *buf, size_t count) {
     size_t bytes_written = 0;
@@ -31,7 +31,7 @@ ssize_t write_all(int fd, void *buf, size_t count) {
         bytes_written += res;
     }
     return bytes_written;
-} // write_all
+}
 
 int main() {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
