@@ -4,6 +4,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <stdint.h>
+#include <string.h>
 
 ssize_t read_full(int fd, void *buf, size_t count) {
     size_t bytes_read = 0;
@@ -68,22 +70,17 @@ int main() {
         printf("got a client\n");
         char buf[1024];
         while(1) {
-            ssize_t byte_count = read(ac, buf, sizeof(buf) - 1);
-            if(byte_count < 0) {
-                perror("read");
-                break;
-            }
-            else if(byte_count == 0) {
+            // read 4 byte header
+            char header[4];
+            int res = read_full(ac, header, 4);
+            if(res != 4) {
                 printf("client disconnected\n");
                 break;
             }
-            ssize_t count_byte = write(ac, buf, byte_count);
-            buf[byte_count] = '\0';
-            printf("client says %s\n", buf);
-            if(count_byte < 0) {
-                perror("write");
-                break;
-            }
+            // convert header to a number
+            uint32_t length;
+            memcpy(&length, header, sizeof(header));
+            printf("the length is %u\n", length);
         }
         close(ac);
     }
