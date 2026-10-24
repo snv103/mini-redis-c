@@ -70,17 +70,19 @@ int main() {
         printf("got a client\n");
         char buf[1024];
         while(1) {
-            // read 4 byte header
             char header[4];
             int res = read_full(ac, header, 4);
             if(res != 4) {
                 printf("client disconnected\n");
                 break;
             }
-            // convert header to a number
             uint32_t length;
             memcpy(&length, header, sizeof(header));
             printf("the length is %u\n", length);
+            if(length > sizeof(buf) - 1) {
+                printf("message overflow\n");
+                break;
+            }
         }
         close(ac);
     }
