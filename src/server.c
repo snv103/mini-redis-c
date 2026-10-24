@@ -71,7 +71,7 @@ int main() {
         char buf[1024];
         while(1) {
             char header[4];
-            int res = read_full(ac, header, 4);
+            ssize_t res = read_full(ac, header, 4);
             if(res != 4) {
                 printf("client disconnected\n");
                 break;
@@ -83,6 +83,13 @@ int main() {
                 printf("message overflow\n");
                 break;
             }
+            res = read_full(ac, buf, length);
+            if(res != length) {
+                printf("client disconnected mid-message\n");
+                break;
+            }
+            buf[length] = '\0';
+            printf("the client says %s\n", buf);
         }
         close(ac);
     }
