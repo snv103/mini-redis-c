@@ -90,6 +90,17 @@ int main() {
             }
             buf[length] = '\0';
             printf("the client says %s\n", buf);
+
+            res = write_all(ac, header, 4);
+            if(res != 4) {
+                printf("client disconnected\n");
+                break;
+            }
+            res = write_all(ac, buf, length);
+            if(res != length) {
+                printf("send failed\n");
+                break;
+            }
         }
         close(ac);
     }
