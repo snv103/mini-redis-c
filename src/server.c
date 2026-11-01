@@ -1,3 +1,22 @@
+// #include <stdio.h>
+// #include <poll.h>
+
+// int main(void) {
+    // struct pollfd pfds[1];
+    // pfds[0].fd = 0;
+    // pfds[0].events = POLLIN;
+    // printf("hit return or wait 2 seconds to timeout\n");
+    // int num_events = poll(pfds, 1, 2000);
+    // if(num_events == 0) printf("pole timed out\n");
+    // else {
+    //     int pollin_happened = pfds[0].revents & POLLIN;
+    //     if(pollin_happened) printf("file descriptor %d is ready to read\n", pfds[0].fd);
+    //     else {
+    //         printf("unexpected event occurred: %d\n", pfds[0].revents);
+    //     }
+    // }
+// }
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -6,6 +25,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
+#include <poll.h>
 
 ssize_t read_full(int fd, void *buf, size_t count) {
     size_t bytes_read = 0;
@@ -59,6 +79,39 @@ int main() {
         exit(1);
     }
     printf("the server is listening to port 1234\n");
+
+    // poll
+    struct pollfd pfds[1];
+    pfds[0].fd = fd;
+    pfds[0].events = POLLIN;
+    // printf("hit return or wait 2 seconds to timeout\n");
+    // int num_events = poll(pfds, -1, 2000);
+    // if(num_events == 0) printf("pole timed out\n");
+    // else {
+    //     int pollin_happened = pfds[0].revents & POLLIN;
+    //     if(pollin_happened) printf("file descriptor %d is ready to read\n", pfds[0].fd);
+    //     else printf("unexpected event occurred: %d\n", pfds[0].revents);
+    // }
+    while(1) {
+        int num_events = poll(pfds, 1, -1);
+        if(num_events < 0) {
+            printf("error occurred\n");
+            break;
+        }
+        int pollin_happened = pfds[0].revents & POLLIN;
+        if(pollin_happened) {
+            struct sockaddr_in client = {0};
+            socklen_t client_len = sizeof(client);
+            int ac = accept(fd, (struct sockaddr *)&client, &client_len);
+            if(ac < 0) {
+            perror("accept");
+            continue;
+            }
+            printf("got a client\n");
+            close(ac);
+        }
+    }
+
     while(1) {
         struct sockaddr_in client = {0};
         socklen_t client_len = sizeof(client);
